@@ -50,9 +50,12 @@ namespace TvShowSubtitleRenamer
                 string answerS = Console.ReadLine();
                 if (answerS.ToLower()[0] != 'y')
                     continue;
-            
+                
+                Console.Write("Subtitle language (eg. en): ");
+                string language = Console.ReadLine();
+                
                 for (int i = 0; i < subtitlePaths.Length; i++)
-                    File.Move(subtitlePaths[i], pathToShow + "\\" + Path.GetFileNameWithoutExtension(videoPaths[i]) + ".en.srt");
+                    File.Move(subtitlePaths[i], pathToShow + "\\" + Path.GetFileNameWithoutExtension(videoPaths[i]) + "." + language + ".srt");
 
                 Console.WriteLine("Process complete, press any key to exit.");
                 Console.ReadKey();
