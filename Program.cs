@@ -10,132 +10,91 @@ namespace TvShowSubtitleRenamer
         private static string _showPath;
         private static string[] _videoPaths;
         private static string[] _subtitlePaths;
-        private static string language;
+        private static string _language;
         
         public static void Main(string[] args)
         {
-            /*
+            GetPath();
+        }
+        
+        static void GetPath()
+        {
             while (true)
             {
-                string pathToShow = "";
-
-                bool doLoop = true;
-                while (doLoop)
+                Console.Write("Path to the shows directory (containing episodes and subtitles):");
+                _showPath = Console.ReadLine();
+                if (Directory.Exists(_showPath))
                 {
-                    Console.Write("Path to the shows directory (containing episodes and subtitles):");
-                    pathToShow = Console.ReadLine();
-                    if (Directory.Exists(pathToShow))
-                        doLoop = false;
-                    else
-                        Console.WriteLine("This path doesn't exist, try again.");
+                    // Find all mp4 and srt files
+                    _videoPaths = Directory.GetFiles(_showPath, "*.*").Where(s => Path.GetExtension(s) == ".mp4").ToArray();
+                    _subtitlePaths = Directory.GetFiles(_showPath, "*.*").Where(s => Path.GetExtension(s) == ".srt").ToArray();
+                
+                    // Sort arrays to get the right order
+                    Array.Sort(_videoPaths);
+                    Array.Sort(_subtitlePaths);
 
+                    CheckVideoOrder();
+                    break;
                 }
-            
-                // Find all mp4 and srt files
-                string[] videoPaths = Directory.GetFiles(pathToShow,  "*.*").Where(s => Path.GetExtension(s) == ".mp4").ToArray();
-                string[] subtitlePaths = Directory.GetFiles(pathToShow, "*.*").Where(s => Path.GetExtension(s) == ".srt").ToArray();
-            
-                // Sort arrays to get the right order
-                Array.Sort(videoPaths);
-                Array.Sort(subtitlePaths);
-            
+                Console.WriteLine("This path doesn't exist, try again.");
+            }
+        }
+        
+        static void CheckVideoOrder()
+        {
+            while (true)
+            {
                 // List all mp4 files
-                for (int i = 0; i < videoPaths.Length; i++)
-                    Console.WriteLine((i + 1) + ". " + Path.GetFileName(videoPaths[i]));
+                for (int i = 0; i < _videoPaths.Length; i++)
+                    Console.WriteLine((i + 1) + ". " + Path.GetFileName(_videoPaths[i]));
 
                 Console.WriteLine("Are these the correct video files, in the right order? (y/n):");
                 string answerV = Console.ReadLine();
-                if (answerV.ToLower()[0] != 'y')
-                    continue;
+                if (answerV.ToLower()[0] == 'y')
+                {
+                    CheckSubtitleOrder();
+                    break;
+                }
 
+                int[] correctOrder = OtherFunctions.AskOrder();
+                OtherFunctions.RearrangeList(ref _videoPaths, correctOrder);
+            }
+        }
+
+        static void CheckSubtitleOrder()
+        {
+            while (true)
+            {
                 // List all srt files
-                for (int i = 0; i < subtitlePaths.Length; i++)
-                    Console.WriteLine((i + 1) + ". " + Path.GetFileName(subtitlePaths[i]));
+                for (int i = 0; i < _subtitlePaths.Length; i++)
+                    Console.WriteLine((i + 1) + ". " + Path.GetFileName(_subtitlePaths[i]));
 
                 Console.WriteLine("Are these the correct video files, in the right order? (y/n):");
                 string answerS = Console.ReadLine();
-                if (answerS.ToLower()[0] != 'y')
-                    continue;
-                
-                Console.Write("Subtitle language (eg. en): ");
-                string language = Console.ReadLine();
-                
-                for (int i = 0; i < subtitlePaths.Length; i++)
-                    File.Move(subtitlePaths[i], pathToShow + "\\" + Path.GetFileNameWithoutExtension(videoPaths[i]) + "." + language + ".srt");
-
-                Console.WriteLine("Process complete, press any key to exit.");
-                Console.ReadKey();
-            }
-            */
-        }
-        
-        void GetPath()
-        {
-            Console.Write("Path to the shows directory (containing episodes and subtitles):");
-            _showPath = Console.ReadLine();
-            if (Directory.Exists(_showPath))
-            {
-                // Find all mp4 and srt files
-                _videoPaths = Directory.GetFiles(_showPath, "*.*").Where(s => Path.GetExtension(s) == ".mp4").ToArray();
-                _subtitlePaths = Directory.GetFiles(_showPath, "*.*").Where(s => Path.GetExtension(s) == ".srt").ToArray();
-                
-                // Sort arrays to get the right order
-                Array.Sort(_videoPaths);
-                Array.Sort(_subtitlePaths);
-
-                CheckVideoOrder();
-            }
-            else
-                Console.WriteLine("This path doesn't exist, try again.");
-        }
-        
-        void CheckVideoOrder()
-        {
-            // List all mp4 files
-            for (int i = 0; i < _videoPaths.Length; i++)
-                Console.WriteLine((i + 1) + ". " + Path.GetFileName(_videoPaths[i]));
-
-            Console.WriteLine("Are these the correct video files, in the right order? (y/n):");
-            string answerV = Console.ReadLine();
-            if (answerV.ToLower()[0] != 'y')
-                CheckSubtitleOrder();
-            else
-            {
-                int[] correctOrder = OtherFunctions.AskOrder();
-                OtherFunctions.RearrangeList(ref _videoPaths, correctOrder);
-                CheckVideoOrder();
-            }
-                
-        }
-
-        void CheckSubtitleOrder()
-        {
-            // List all srt files
-            for (int i = 0; i < _subtitlePaths.Length; i++)
-                Console.WriteLine((i + 1) + ". " + Path.GetFileName(_subtitlePaths[i]));
-
-            Console.WriteLine("Are these the correct video files, in the right order? (y/n):");
-            string answerS = Console.ReadLine();
-            if (answerS.ToLower()[0] != 'y')
-                ChooseLanguage();
-            else
-            {
+                if (answerS.ToLower()[0] == 'y')
+                {
+                    ChooseLanguage();
+                    break;
+                }
                 int[] correctOrder = OtherFunctions.AskOrder();
                 OtherFunctions.RearrangeList(ref _subtitlePaths, correctOrder);
-                CheckSubtitleOrder();
             }
         }
 
-        void ChooseLanguage()
+        static void ChooseLanguage()
         {
             Console.Write("Subtitle language (eg. en): ");
-            language = Console.ReadLine();
+            _language = Console.ReadLine();
+            FinalFunction();
         }
 
-        void FinalFunction()
+        static void FinalFunction()
         {
             for (int i = 0; i < _subtitlePaths.Length; i++)
-                File.Move(_subtitlePaths[i], _showPath + "\\" + Path.GetFileNameWithoutExtension(_videoPaths[i]) + "." + language + ".srt");
+                File.Move(_subtitlePaths[i], i + ".temp");
+            
+            for (int i = 0; i < _subtitlePaths.Length; i++)
+                File.Move(i + ".temp", _showPath + "\\" + Path.GetFileNameWithoutExtension(_videoPaths[i]) + "." + _language + ".srt");
 
             Console.WriteLine("Process complete, press any key to exit.");
             Console.ReadKey();

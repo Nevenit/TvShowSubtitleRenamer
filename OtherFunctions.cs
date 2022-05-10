@@ -12,7 +12,7 @@ namespace TvShowSubtitleRenamer
 
             for (int i = 0; i < arr.Length; i++)
             {
-                final[i] = arr[order[i]];
+                final[i] = arr[order[i] - 1];
             }
 
             arr = final;
@@ -41,6 +41,7 @@ namespace TvShowSubtitleRenamer
             
             // Verify List
             List<int> arrList = intList.ToList();
+            arrList.Sort();
             for (int i = 0; i < arrList.Count - 2; i++)
             {
                 if (arrList[i + 1] - arrList[i] != 1)
