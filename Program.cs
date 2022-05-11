@@ -14,6 +14,7 @@ namespace TvShowSubtitleRenamer
         
         public static void Main(string[] args)
         {
+            // Start function chain
             GetPath();
         }
         
@@ -23,6 +24,8 @@ namespace TvShowSubtitleRenamer
             {
                 Console.Write("Path to the shows directory (containing episodes and subtitles):");
                 _showPath = Console.ReadLine();
+                
+                // Check if path exists, also validates the path
                 if (Directory.Exists(_showPath))
                 {
                     // Find all mp4 and srt files
@@ -32,10 +35,12 @@ namespace TvShowSubtitleRenamer
                     // Sort arrays to get the right order
                     Array.Sort(_videoPaths);
                     Array.Sort(_subtitlePaths);
-
+                    
                     CheckVideoOrder();
                     break;
                 }
+                
+                // If path check fails, notify user and repeat the loop
                 Console.WriteLine("This path doesn't exist, try again.");
             }
         }
